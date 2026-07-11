@@ -1,57 +1,127 @@
+import { useState } from "react";
+
 export default function Sidebar({
   files,
+  folders=[],
   current,
   setCurrent,
   createFile,
+  createFolder,
+  renameFile,
+  deleteFile,
 }) {
-  return (
+
+  const [open,setOpen]=useState({});
+
+  const toggle=(name)=>{
+    setOpen({
+      ...open,
+      [name]:!open[name],
+    });
+  };
+
+  return(
     <aside
       style={{
         width:220,
         background:"#111827",
         color:"#fff",
-        padding:10,
-        borderRight:"1px solid #222"
+        overflow:"auto",
+        borderRight:"1px solid #222",
       }}
     >
+
       <div
         style={{
           display:"flex",
-          justifyContent:"space-between",
-          alignItems:"center",
-          marginBottom:10
+          gap:6,
+          padding:10,
         }}
       >
-        <b>EXPLORER</b>
+        <button
+          style={{flex:1}}
+          onClick={createFile}
+        >
+          📄
+        </button>
 
         <button
-          onClick={createFile}
-          style={{
-            cursor:"pointer",
-            padding:"4px 8px"
-          }}
+          style={{flex:1}}
+          onClick={createFolder}
         >
-          +
+          📁
         </button>
       </div>
 
-      {Object.keys(files).map((name)=>(
-        <div
-          key={name}
-          onClick={()=>setCurrent(name)}
-          style={{
-            padding:"8px",
-            cursor:"pointer",
-            borderRadius:6,
-            background:
-              current===name
-                ? "#374151"
-                : "transparent"
-          }}
-        >
-          📄 {name}
+      {folders.map(folder=>(
+
+        <div key={folder}>
+
+          <div
+            onClick={()=>toggle(folder)}
+            style={{
+              cursor:"pointer",
+              padding:"8px 10px",
+              fontWeight:"bold",
+            }}
+          >
+            {open[folder] ? "📂" : "📁"} {folder}
+          </div>
+
+          {open[folder] &&
+            Object.keys(files)
+              .filter(f=>f.startsWith(folder+"/"))
+              .map(file=>(
+
+                <div
+                  key={file}
+                  style={{
+                    padding:"6px 24px",
+                    background:
+                      current===file
+                      ?"#374151"
+                      :"transparent",
+                  }}
+                >
+                  <div
+                    onClick={()=>setCurrent(file)}
+                    style={{
+                      cursor:"pointer",
+                    }}
+                  >
+                    📄 {file.split("/").pop()}
+                  </div>
+
+                  <div
+                    style={{
+                      display:"flex",
+                      gap:4,
+                      marginTop:4,
+                    }}
+                  >
+                    <button
+                      onClick={()=>renameFile(file)}
+                    >
+                      ✏
+                    </button>
+
+                    <button
+                      onClick={()=>deleteFile(file)}
+                    >
+                      🗑
+                    </button>
+
+                  </div>
+
+                </div>
+
+              ))
+          }
+
         </div>
+
       ))}
+
     </aside>
   );
 }
